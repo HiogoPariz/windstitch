@@ -1,7 +1,7 @@
-import { w, W } from '../src';
-import { expectType } from 'tsd';
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { expectType } from 'tsd';
+import { w, W } from '../src';
 
 describe('styled', () => {
   const defaultClassName = 'xyz';
@@ -71,6 +71,7 @@ describe('styled', () => {
             primary: 'bg-primary-500',
             secondary: 'bg-secondary-500',
           },
+          hideCheck: (yes: boolean) => yes ? '' : ''
         },
         compoundVariants: [
           {
@@ -90,6 +91,7 @@ describe('styled', () => {
           color: 'primary',
           textColor: 'primary',
           fontSize: 'base',
+          hideCheck: false
         },
         transient: ['textColor'],
       });
@@ -243,8 +245,8 @@ describe('styled', () => {
     }
 
     const mockPost = { id: '1' };
-    const Post: React.FC<PostProps> = ({ className, ariaLabel }) => (
-      <article className={className} aria-label={ariaLabel}>
+    const Post: React.FC<PostProps> = ({ className, ariaLabel, ...props }) => (
+      <article data-testid="article" className={className} aria-label={ariaLabel} {...props}>
         Post
       </article>
     );
@@ -274,6 +276,7 @@ describe('styled', () => {
         variants,
         defaultVariants: {
           isActive: false,
+          hideCheck: false
         },
         defaultProps: {
           ariaLabel: 'Teste',
@@ -284,6 +287,12 @@ describe('styled', () => {
         render(<CustomWithDefaultProps post={mockPost} color="gray" />);
         expect(screen.getByLabelText('Teste')).toBeInTheDocument();
       });
+
+      it('should not forward isActive it to the component', () => {
+        render(<CustomWithDefaultProps post={mockPost} color="gray" isActive />);
+        expect(screen.getByTestId('article')).not.toHaveAttribute("isActive");
+      });
+
 
       it('should not make prop types optional', () => {
         expectType<true>(
